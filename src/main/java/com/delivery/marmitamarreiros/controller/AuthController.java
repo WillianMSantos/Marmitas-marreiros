@@ -1,57 +1,46 @@
 package com.delivery.marmitamarreiros.controller;
 
 import com.delivery.marmitamarreiros.dto.request.LoginRequestDto;
-import com.delivery.marmitamarreiros.dto.request.RegisterRequestDto;
-import com.delivery.marmitamarreiros.dto.response.DefaultMessageResponseDto;
-import com.delivery.marmitamarreiros.dto.response.LoginResponseDto;
-import com.delivery.marmitamarreiros.exception.ExistingEmailException;
-import com.delivery.marmitamarreiros.exception.InvalidDataException;
-import com.delivery.marmitamarreiros.exception.UserNotFoundException;
+import com.delivery.marmitamarreiros.dto.response.TokenDto;
+import com.delivery.marmitamarreiros.exception.SenhaInvalidaException;
+import com.delivery.marmitamarreiros.model.Auth;
 import com.delivery.marmitamarreiros.service.AuthService;
-import com.sun.istack.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.delivery.marmitamarreiros.service.JwtService;
+import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    public AuthService authService;
+    private final AuthService authService;
+    private final JwtService jwtService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> userRegister(@NotNull @RequestBody RegisterRequestDto registerRequest) {
-        try{
-            authService.userRegister(registerRequest);
-            return ResponseEntity.ok().build();
-        }
-        catch (ExistingEmailException | InvalidDataException e) {
-            return new ResponseEntity(new DefaultMessageResponseDto(e.getMessage(),
-                    HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
-        }
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation("Salva um Usuário")
+    public Auth save(@RequestBody @Valid Auth usuario){
+        return authService.save(usuario);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> loginUser(@RequestBody LoginRequestDto loginRequest) {
+    @PostMapping("/auth")
+    @ApiOperation("Autentica um Usuário")
+    public TokenDto autenticar(@RequestBody LoginRequestDto credenciais) {
         try {
-            String jwt = authService.loginUser(loginRequest);
-            LoginResponseDto response = new LoginResponseDto(jwt, "Bearer");
-
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-
-        catch (UserNotFoundException e) {
-            return new ResponseEntity(new DefaultMessageResponseDto(e.getMessage(), HttpStatus.NOT_FOUND.value()),
-                    HttpStatus.NOT_FOUND);
-        }
-
-        catch (Exception e) {
-            return new ResponseEntity(new DefaultMessageResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST);
-
+            Auth usuario = Auth.builder().email(credenciais.getEmail()).senha(credenciais.getPassword()).build();
+            UserDetails usuarioAutenticado = authService.autenticar(usuario);
+            String token = jwtService.gerarToken(usuario);
+            return new TokenDto(usuarioAutenticado.getUsername(), token);
+        }catch (UsernameNotFoundException | SenhaInvalidaException e){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
     }
-
 }

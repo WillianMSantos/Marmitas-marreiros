@@ -10,9 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
 @Entity
-@Table(name = "TB_PEDIDO")
+@Table(name = "pedido")
 public class Pedido {
 
     @Id
@@ -20,22 +19,20 @@ public class Pedido {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "CLIENT_ID")
+    @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @Column(name = "DATA_PEDIDO")
+    @Column(name = "data_pedido")
     private LocalDate dataPedido;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS")
-    private StatusPedido status;
-
-    @Column(name = "TOTAL", precision = 20, scale = 2)
+    @Column(name = "total", precision = 20, scale = 2)
     private BigDecimal total;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private StatusPedido status;
 
     @OneToMany(mappedBy = "pedido")
     private List<ItemPedido> itens;
-
-
 
 }

@@ -3,7 +3,11 @@ package com.delivery.marmitamarreiros.repository;
 import com.delivery.marmitamarreiros.model.Auth;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AuthRepository extends JpaRepository<Auth, Long> {
+import java.util.Optional;
 
-    Auth findByEmail(String email);
+public interface AuthRepository extends JpaRepository<Auth, Integer> {
+
+    Optional<Auth> findByEmail(String email);
+
+
 }

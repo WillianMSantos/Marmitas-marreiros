@@ -1,36 +1,36 @@
 package com.delivery.marmitamarreiros.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
-@Entity
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Entity
 @Table(name = "TB_USUARIO")
 public class Auth {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ID_USER")
-    @SequenceGenerator(name = "ID_USER", sequenceName = "TB_USER", allocationSize = 1)
-    @Column(name = "ID_USER")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "EMAIL", unique = true)
+    @NotEmpty(message = "{campo.login.obrigatorio}")
+    @Column
     private String email;
 
-    @Column(name = "PASSWORD")
-    private String password;
+    @NotEmpty(message = "{campo.senha.obrigatorio}")
+    @Column
+    private String senha;
 
-    @ManyToMany
-    private List<Role> roles;
+    @NotNull
+    private boolean admin;
+
 }

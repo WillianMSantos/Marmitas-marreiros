@@ -1,62 +1,58 @@
 package com.delivery.marmitamarreiros.service;
 
-import com.delivery.marmitamarreiros.dto.request.LoginRequestDto;
-import com.delivery.marmitamarreiros.dto.request.RegisterRequestDto;
-import com.delivery.marmitamarreiros.exception.ExistingEmailException;
-import com.delivery.marmitamarreiros.exception.InvalidDataException;
-import com.delivery.marmitamarreiros.exception.UserNotFoundException;
-import com.delivery.marmitamarreiros.exception.WrongPasswordException;
+import com.delivery.marmitamarreiros.exception.*;
 import com.delivery.marmitamarreiros.model.Auth;
 import com.delivery.marmitamarreiros.repository.AuthRepository;
-import lombok.val;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AuthService {
+public class AuthService implements UserDetailsService {
 
     @Autowired
-    AuthRepository authRepository;
+    private AuthRepository authRepository;
 
     @Autowired
-    JwtService jwtService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    EncryptService encryptService;
+    private PasswordEncoder encoder;
 
-    public void userRegister(RegisterRequestDto registerRequest) {
-
-        if(registerRequest.isNullOrEmpty()) {
-            throw new InvalidDataException();
-        }
-
-        if(authRepository.findByEmail(registerRequest.getEmail()) != null) {
-            throw new ExistingEmailException();
-        }
-
-        val user = new Auth();
-        user.setEmail(registerRequest.getEmail());
-        user.setName(registerRequest.getName());
-        user.setPassword(encryptService.encryptPassword(registerRequest.getPassword()));
-        authRepository.save(user);
+    @Transactional
+    public Auth save(Auth usuario){
+        String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
+        usuario.setSenha(senhaCriptografada);
+        return authRepository.save(usuario);
     }
 
-    public String loginUser(LoginRequestDto requestDto) {
-
-        if (requestDto.isNullOrEmpty()){
-            throw new InvalidDataException();
+    public UserDetails autenticar(Auth usuario){
+        UserDetails user = loadUserByUsername(usuario.getEmail());
+        boolean senhasOk = encoder.matches(usuario.getSenha(), user.getPassword());
+        if (senhasOk){
+            return user;
         }
-
-        Auth user = authRepository.findByEmail(requestDto.getEmail());
-        if (user == null) {
-            throw new UserNotFoundException();
-        }
-
-        if (!encryptService.passwordValid(requestDto.getPassword(), user.getPassword())){
-             throw new WrongPasswordException();
-        }
-
-        return jwtService.generateJwt(requestDto);
+        throw new SenhaInvalidaException();
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        Auth usuario = authRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
+
+        String[] roles = usuario.isAdmin() ? new String[]{"ADMIN", "USER"} : new String[]{"USER"};
+
+        return  User.builder()
+                .username(usuario.getEmail())
+                .password(usuario.getSenha())
+                .roles(roles)
+                .build();
+    }
 }

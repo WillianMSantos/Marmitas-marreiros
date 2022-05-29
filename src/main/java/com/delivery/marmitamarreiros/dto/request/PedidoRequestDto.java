@@ -1,17 +1,13 @@
 package com.delivery.marmitamarreiros.dto.request;
 
 import com.delivery.marmitamarreiros.validation.NotEmptyList;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PedidoRequestDto {

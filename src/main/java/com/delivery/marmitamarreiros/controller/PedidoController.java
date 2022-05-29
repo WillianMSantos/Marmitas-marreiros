@@ -9,6 +9,7 @@ import com.delivery.marmitamarreiros.model.Pedido;
 import com.delivery.marmitamarreiros.model.StatusPedido;
 import com.delivery.marmitamarreiros.service.PedidoService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
+    @Autowired
     private PedidoService pedidoService;
 
     public PedidoController(PedidoService pedidoService) {
@@ -43,7 +45,7 @@ public class PedidoController {
     @ApiOperation("Consulta um Pedido")
     public InformacoesPedidoDto getById(@PathVariable Integer id){
         return pedidoService.obterPedidoCompelto(id)
-                .map(this::converter)
+                .map(p -> converter(p))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
     }
 
@@ -68,16 +70,16 @@ public class PedidoController {
                 .build();
     }
 
-    private List<InformacaoItemPedidoDto> converter(List<ItemPedido> itens) {
+    private List<InformacaoItemPedidoDto> converter(List<ItemPedido> itens){
         if(CollectionUtils.isEmpty(itens)){
             return Collections.emptyList();
         }
 
         return itens.stream()
                 .map(item -> InformacaoItemPedidoDto.builder()
-                .descricao(item.getProduto().getDescricao())
-                .precoUnitario(item.getProduto().getPreco())
-                .quantidade(item.getQuantidade())
-                .build()).collect(Collectors.toList());
+                        .descricao(item.getProduto().getDescricao())
+                        .precoUnitario(item.getProduto().getPreco())
+                        .quantidade(item.getQuantidade())
+                        .build()).collect(Collectors.toList());
     }
 }
