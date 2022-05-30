@@ -26,7 +26,7 @@ public class ClienteController {
         this.clienteRepository = clienteRepository;
     }
 
-    @GetMapping("{id")
+    @GetMapping("{id}")
     @ApiOperation("Consulta os dados de um Cliente")
     public Cliente getClienteById(@PathVariable Integer id) {
         return clienteRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
