@@ -8,11 +8,11 @@ import lombok.Setter;
 public class RegisterRequestDto {
 
     private String email;
-    private String name;
-    private String password;
+    private String nome;
+    private String senha;
 
     public boolean isNullOrEmpty() {
-        return this.getEmail() == null || this.getPassword() == null || this.getName() == null ||
-                this.getEmail().isEmpty() || this.getPassword().isEmpty() || this.getName().isEmpty();
+        return this.getEmail() == null || this.getSenha() == null || this.getNome() == null ||
+                this.getEmail().isEmpty() || this.getSenha().isEmpty() || this.getNome().isEmpty();
     }
 }

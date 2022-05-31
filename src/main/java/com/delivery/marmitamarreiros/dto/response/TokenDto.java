@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TokenDto {
 
-    private String login;
     private String token;
+    private String tipo;
 
 }

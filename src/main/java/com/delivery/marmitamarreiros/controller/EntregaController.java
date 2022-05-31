@@ -36,9 +36,9 @@ public class EntregaController {
         return entrega.getId();
     }
 
-    @GetMapping
-    @ApiOperation("Consulta os dados de um Cliente")
-    public Entrega getClienteById(@PathVariable Integer id) {
+    @GetMapping("{id}")
+    @ApiOperation("Consulta os dados de uma entrega")
+    public Entrega getEntregaById(@PathVariable Integer id) {
         return entregaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Entrega não localizada"));
     }
