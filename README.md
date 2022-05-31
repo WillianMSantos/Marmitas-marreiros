@@ -3,7 +3,7 @@ Delivery de marmaita
 
 # Sobre o projeto
 A aplicação consiste em uma API Rest que possibilita as opreações basícas de cadastramento de usuários, 
-clientes, produtos, e pedidos, também implementa padrões atuais de segurança como token JWT, 
+clientes, produtos, entregas e pedidos, também implementa padrões atuais de segurança como token JWT, 
 além de toda documentação com Swagger.
 
 # Tecnologias usadas
